@@ -1,10 +1,10 @@
-% QN 1
 % Parameters for synthetic signal to try
 T = 2*pi; % Total time interval
 dt = 0.001; % Base sampling step
 omega = 2.0; % Frequency
 phi = pi/6; % Phase
 sigma = 0.01; % Noise standard deviation
+K = 2.^(0:7); % Step size multipliers
 
 % Generate synthetic data y = sin(omega*t + phi)
 t = 0:dt:T;
@@ -14,25 +14,17 @@ y_prime_true = omega*cos(omega*t + phi);
 % Add noise
 noise = normrnd(0, sigma, [1, length(t)]);
 y_noise = y + noise;
-% QN 1
 
-% QN 2 and 3
-K = 2.^(0:7);
-forward_diff = zeros(1, 8);
-forward_diff_noise = zeros(1, 8);
-backward_diff = zeros(1, 8);
-backward_diff_noise = zeros(1, 8);
-central_diff = zeros(1, 8);
-central_diff_noise = zeros(1, 8);
-i = 1;
+% Arrays to store L2 errors for different schemes, for each step size
+forward_diff = zeros(1, length(K));
+forward_diff_noise = zeros(1, length(K));
+backward_diff = zeros(1, length(K));
+backward_diff_noise = zeros(1, length(K));
+central_diff = zeros(1, length(K));
+central_diff_noise = zeros(1, length(K));
+
 % Forward difference scheme y'_n = [f((n+1)h) - f(nh)]/h
-for k = K
-    h = k*dt;
-    t_sampled = 0:h:T;
-    y_noise_sampled = y_noise(1:k:length(y));
-    y_sampled = y(1:k:length(y));
-    y_prime_true_sampled = y_prime_true(1:k:length(y));
-
+function [forward_diff_error, forward_diff_error_noise] = forward(h, t_sampled, y_sampled, y_noise_sampled, y_prime_true_sampled)
     t_sampled_for_deriv = t_sampled(1:end-1);
     y_prime = zeros(1, length(t_sampled_for_deriv));
     y_prime_noise = zeros(1, length(t_sampled_for_deriv));
@@ -51,23 +43,14 @@ for k = K
     % Compute L2/RMS error
     sum_of_squares = sum(squared_error);
     mean_squared = sum_of_squares/length(t_sampled_for_deriv);
-    forward_diff(i) = sqrt(mean_squared);
+    forward_diff_error = sqrt(mean_squared);
     sum_of_squares_noise = sum(squared_error_noise);
     mean_squared_noise = sum_of_squares_noise/length(t_sampled_for_deriv);
-    forward_diff_noise(i) = sqrt(mean_squared_noise);
-
-    i = i + 1;
+    forward_diff_error_noise = sqrt(mean_squared_noise);
 end
 
 % Backward difference scheme y'_n = [f(nh) - f((n-1)h)]/h
-i = 1;
-for k = K
-    h = k*dt;
-    t_sampled = 0:h:T;
-    y_noise_sampled = y_noise(1:k:length(y));
-    y_sampled = y(1:k:length(y));
-    y_prime_true_sampled = y_prime_true(1:k:length(y));
-
+function [backward_diff_error, backward_diff_error_noise] = backward(h, t_sampled, y_sampled, y_noise_sampled, y_prime_true_sampled)
     t_sampled_for_deriv = t_sampled(2:end);
     y_prime = zeros(1, length(t_sampled_for_deriv));
     y_prime_noise = zeros(1, length(t_sampled_for_deriv));
@@ -86,23 +69,14 @@ for k = K
     % Compute L2/RMS error
     sum_of_squares = sum(squared_error);
     mean_squared = sum_of_squares/length(t_sampled_for_deriv);
-    backward_diff(i) = sqrt(mean_squared);
+    backward_diff_error = sqrt(mean_squared);
     sum_of_squares_noise = sum(squared_error_noise);
     mean_squared_noise = sum_of_squares_noise/length(t_sampled_for_deriv);
-    backward_diff_noise(i) = sqrt(mean_squared_noise);
-
-    i = i + 1;
+    backward_diff_error_noise = sqrt(mean_squared_noise);
 end
 
 % Central difference scheme y'_n = [f((n+1)h) - f((n-1)h)]/2h
-i = 1;
-for k = K
-    h = k*dt;
-    t_sampled = 0:h:T;
-    y_noise_sampled = y_noise(1:k:length(y));
-    y_sampled = y(1:k:length(y));
-    y_prime_true_sampled = y_prime_true(1:k:length(y));
-
+function [central_diff_error, central_diff_error_noise] = central(h, t_sampled, y_sampled, y_noise_sampled, y_prime_true_sampled)
     t_sampled_for_deriv = t_sampled(2:end-1);
     y_prime = zeros(1, length(t_sampled_for_deriv));
     y_prime_noise = zeros(1, length(t_sampled_for_deriv));
@@ -121,12 +95,24 @@ for k = K
     % Compute L2/RMS error
     sum_of_squares = sum(squared_error);
     mean_squared = sum_of_squares/length(t_sampled_for_deriv);
-    central_diff(i) = sqrt(mean_squared);
+    central_diff_error = sqrt(mean_squared);
     sum_of_squares_noise = sum(squared_error_noise);
     mean_squared_noise = sum_of_squares_noise/length(t_sampled_for_deriv);
-    central_diff_noise(i) = sqrt(mean_squared_noise);
+    central_diff_error_noise = sqrt(mean_squared_noise);
+end
 
-    i = i + 1;
+% Loop for all step size multipliers
+for i = 1:length(K)
+    k = K(i);
+    h = k*dt;
+    t_sampled = 0:h:T;
+    y_sampled = y(1:k:length(y));
+    y_noise_sampled = y_noise(1:k:length(y));
+    y_prime_true_sampled = y_prime_true(1:k:length(y));
+
+    [forward_diff(i), forward_diff_noise(i)] = forward(h, t_sampled, y_sampled, y_noise_sampled, y_prime_true_sampled);
+    [backward_diff(i), backward_diff_noise(i)] = backward(h, t_sampled, y_sampled, y_noise_sampled, y_prime_true_sampled);
+    [central_diff(i), central_diff_noise(i)] = central(h, t_sampled, y_sampled, y_noise_sampled, y_prime_true_sampled);
 end
 
 figure
@@ -141,4 +127,3 @@ loglog(K*dt, forward_diff_noise, '-o', K*dt, backward_diff_noise, '-x', K*dt, ce
 legend('forward', 'backward', 'central')
 xlabel('h')
 ylabel('difference noise')
-% QN 2 and 3
