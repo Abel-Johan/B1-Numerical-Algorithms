@@ -31,39 +31,30 @@ for k = K
     t_sampled = 0:h:T;
     y_noise_sampled = y_noise(1:k:length(y));
     y_sampled = y(1:k:length(y));
+    y_prime_true_sampled = y_prime_true(1:k:length(y));
 
     t_sampled_for_deriv = t_sampled(1:end-1);
     y_prime = zeros(1, length(t_sampled_for_deriv));
     y_prime_noise = zeros(1, length(t_sampled_for_deriv));
 
-    % tiledlayout(4,1)
+    % Compute derivative at all points
+    % Simultaneously, compute squared error at each point
+    squared_error = zeros(1, length(t_sampled_for_deriv));
+    squared_error_noise = zeros(1, length(t_sampled_for_deriv));
     for n = 1:length(y_prime_noise)
         y_prime(n) = (y_sampled(n+1) - y_sampled(n))./h;
+        squared_error(n) = (y_prime(n) - y_prime_true_sampled(n)).^2;
         y_prime_noise(n) = (y_noise_sampled(n+1) - y_noise_sampled(n))./h;
+        squared_error_noise(n) = (y_prime_noise(n) - y_prime_true_sampled(n)).^2;
     end
 
-    % Compute error on 129th data point because its accessible for all k's
-    exact_deriv = y_prime_true(129);
-    sim_deriv = y_prime(((129-1)/k)+1);
-    sim_noise_deriv = y_prime_noise(((129-1)/k)+1);
-    forward_diff(i) = abs(exact_deriv - sim_deriv);
-    forward_diff_noise(i) = abs(exact_deriv - sim_noise_deriv);
-
-    % nexttile
-    % plot(t, y)
-    % ylabel("sin(\omegat + \phi)")
-    % 
-    % nexttile
-    % plot(t_sampled, y_noise_sampled)
-    % ylabel("noisy sin(\omegat + \phi)")
-    % 
-    % nexttile
-    % plot(t_sampled_for_deriv, y_prime)
-    % ylabel("\omegacos(\omegat + \phi)")
-    % 
-    % nexttile
-    % plot(t_sampled_for_deriv, y_prime_noise)
-    % ylabel("noisy \omegacos(\omegat + \phi)")
+    % Compute L2/RMS error
+    sum_of_squares = sum(squared_error);
+    mean_squared = sum_of_squares/length(t_sampled_for_deriv);
+    fwd_rms = sqrt(mean_squared);
+    sum_of_squares_noise = sum(squared_error_noise);
+    mean_squared_noise = sum_of_squares_noise/length(t_sampled_for_deriv);
+    fwd_rms_noise = sqrt(mean_squared_noise);
 
     i = i + 1;
 end
@@ -75,39 +66,30 @@ for k = K
     t_sampled = 0:h:T;
     y_noise_sampled = y_noise(1:k:length(y));
     y_sampled = y(1:k:length(y));
+    y_prime_true_sampled = y_prime_true(1:k:length(y));
 
     t_sampled_for_deriv = t_sampled(2:end);
     y_prime = zeros(1, length(t_sampled_for_deriv));
     y_prime_noise = zeros(1, length(t_sampled_for_deriv));
 
-    % tiledlayout(4,1)
+    % Compute derivative at all points
+    % Simultaneously, compute squared error at each point
+    squared_error = zeros(1, length(t_sampled_for_deriv));
+    squared_error_noise = zeros(1, length(t_sampled_for_deriv));
     for n = 2:length(y_prime_noise)+1
         y_prime(n-1) = (y_sampled(n) - y_sampled(n-1))./h;
+        squared_error(n-1) = (y_prime(n-1) - y_prime_true_sampled(n-1)).^2;
         y_prime_noise(n-1) = (y_noise_sampled(n) - y_noise_sampled(n-1))./h;
+        squared_error_noise(n-1) = (y_prime_noise(n-1) - y_prime_true_sampled(n-1)).^2;
     end
 
-    % Compute error on 129th data point because its accessible for all k's
-    exact_deriv = y_prime_true(129);
-    sim_deriv = y_prime(((129-1)/k));
-    sim_noise_deriv = y_prime_noise(((129-1)/k));
-    backward_diff(i) = abs(exact_deriv - sim_deriv);
-    backward_diff_noise(i) = abs(exact_deriv - sim_noise_deriv);
-
-    % nexttile
-    % plot(t, y)
-    % ylabel("sin(\omegat + \phi)")
-    % 
-    % nexttile
-    % plot(t_sampled, y_noise_sampled)
-    % ylabel("noisy sin(\omegat + \phi)")
-    % 
-    % nexttile
-    % plot(t_sampled_for_deriv, y_prime)
-    % ylabel("\omegacos(\omegat + \phi)")
-    % 
-    % nexttile
-    % plot(t_sampled_for_deriv, y_prime_noise)
-    % ylabel("noisy \omegacos(\omegat + \phi)")
+    % Compute L2/RMS error
+    sum_of_squares = sum(squared_error);
+    mean_squared = sum_of_squares/length(t_sampled_for_deriv);
+    bwd_rms = sqrt(mean_squared);
+    sum_of_squares_noise = sum(squared_error_noise);
+    mean_squared_noise = sum_of_squares_noise/length(t_sampled_for_deriv);
+    bwd_rms_noise = sqrt(mean_squared_noise);
 
     i = i + 1;
 end
@@ -119,39 +101,30 @@ for k = K
     t_sampled = 0:h:T;
     y_noise_sampled = y_noise(1:k:length(y));
     y_sampled = y(1:k:length(y));
+    y_prime_true_sampled = y_prime_true(1:k:length(y));
 
     t_sampled_for_deriv = t_sampled(2:end-1);
     y_prime = zeros(1, length(t_sampled_for_deriv));
     y_prime_noise = zeros(1, length(t_sampled_for_deriv));
 
-    % tiledlayout(4,1)
+    % Compute derivative at all points
+    % Simultaneously, compute squared error at each point
+    squared_error = zeros(1, length(t_sampled_for_deriv));
+    squared_error_noise = zeros(1, length(t_sampled_for_deriv));
     for n = 2:length(y_prime_noise)+1
         y_prime(n-1) = (y_sampled(n+1) - y_sampled(n-1))./(2*h);
+        squared_error(n-1) = (y_prime(n-1) - y_prime_true_sampled(n-1)).^2;
         y_prime_noise(n-1) = (y_noise_sampled(n+1) - y_noise_sampled(n-1))./(2*h);
+        squared_error_noise(n-1) = (y_prime_noise(n-1) - y_prime_true_sampled(n-1)).^2;
     end
     
-    % Compute error on 129th data point because its accessible for all k's
-    exact_deriv = y_prime_true(129);
-    sim_deriv = y_prime(((129-1)/k));
-    sim_noise_deriv = y_prime_noise(((129-1)/k));
-    central_diff(i) = abs(exact_deriv - sim_deriv);
-    central_diff_noise(i) = abs(exact_deriv - sim_noise_deriv);
-
-    % nexttile
-    % plot(t, y)
-    % ylabel("sin(\omegat + \phi)")
-    % 
-    % nexttile
-    % plot(t_sampled, y_noise_sampled)
-    % ylabel("noisy sin(\omegat + \phi)")
-    % 
-    % nexttile
-    % plot(t_sampled_for_deriv, y_prime)
-    % ylabel("\omegacos(\omegat + \phi)")
-    % 
-    % nexttile
-    % plot(t_sampled_for_deriv, y_prime_noise)
-    % ylabel("noisy \omegacos(\omegat + \phi)")
+    % Compute L2/RMS error
+    sum_of_squares = sum(squared_error);
+    mean_squared = sum_of_squares/length(t_sampled_for_deriv);
+    cen_rms = sqrt(mean_squared);
+    sum_of_squares_noise = sum(squared_error_noise);
+    mean_squared_noise = sum_of_squares_noise/length(t_sampled_for_deriv);
+    cen_rms_noise = sqrt(mean_squared_noise);
 
     i = i + 1;
 end
@@ -159,12 +132,12 @@ end
 figure
 tiledlayout(2, 1)
 nexttile
-loglog(K*dt, forward_diff, '-o', K*dt, backward_diff, '-x', K*dt, central_diff, '-o')
+loglog(K*dt, fwd_rms, '-o', K*dt, bwd_rms, '-x', K*dt, cen_rms, '-o')
 legend('forward', 'backward', 'central')
 xlabel('h')
 ylabel('difference')
 nexttile
-loglog(K*dt, forward_diff_noise, '-o', K*dt, backward_diff_noise, '-x', K*dt, central_diff_noise, '-o')
+loglog(K*dt, fwd_rms_noise, '-o', K*dt, bwd_rms_noise, '-x', K*dt, cen_rms_noise, '-o')
 legend('forward', 'backward', 'central')
 xlabel('h')
 ylabel('difference noise')
