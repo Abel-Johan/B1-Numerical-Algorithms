@@ -51,10 +51,10 @@ for k = K
     % Compute L2/RMS error
     sum_of_squares = sum(squared_error);
     mean_squared = sum_of_squares/length(t_sampled_for_deriv);
-    fwd_rms = sqrt(mean_squared);
+    forward_diff(i) = sqrt(mean_squared);
     sum_of_squares_noise = sum(squared_error_noise);
     mean_squared_noise = sum_of_squares_noise/length(t_sampled_for_deriv);
-    fwd_rms_noise = sqrt(mean_squared_noise);
+    forward_diff_noise(i) = sqrt(mean_squared_noise);
 
     i = i + 1;
 end
@@ -78,18 +78,18 @@ for k = K
     squared_error_noise = zeros(1, length(t_sampled_for_deriv));
     for n = 2:length(y_prime_noise)+1
         y_prime(n-1) = (y_sampled(n) - y_sampled(n-1))./h;
-        squared_error(n-1) = (y_prime(n-1) - y_prime_true_sampled(n-1)).^2;
+        squared_error(n-1) = (y_prime(n-1) - y_prime_true_sampled(n)).^2;
         y_prime_noise(n-1) = (y_noise_sampled(n) - y_noise_sampled(n-1))./h;
-        squared_error_noise(n-1) = (y_prime_noise(n-1) - y_prime_true_sampled(n-1)).^2;
+        squared_error_noise(n-1) = (y_prime_noise(n-1) - y_prime_true_sampled(n)).^2;
     end
 
     % Compute L2/RMS error
     sum_of_squares = sum(squared_error);
     mean_squared = sum_of_squares/length(t_sampled_for_deriv);
-    bwd_rms = sqrt(mean_squared);
+    backward_diff(i) = sqrt(mean_squared);
     sum_of_squares_noise = sum(squared_error_noise);
     mean_squared_noise = sum_of_squares_noise/length(t_sampled_for_deriv);
-    bwd_rms_noise = sqrt(mean_squared_noise);
+    backward_diff_noise(i) = sqrt(mean_squared_noise);
 
     i = i + 1;
 end
@@ -113,18 +113,18 @@ for k = K
     squared_error_noise = zeros(1, length(t_sampled_for_deriv));
     for n = 2:length(y_prime_noise)+1
         y_prime(n-1) = (y_sampled(n+1) - y_sampled(n-1))./(2*h);
-        squared_error(n-1) = (y_prime(n-1) - y_prime_true_sampled(n-1)).^2;
+        squared_error(n-1) = (y_prime(n-1) - y_prime_true_sampled(n)).^2;
         y_prime_noise(n-1) = (y_noise_sampled(n+1) - y_noise_sampled(n-1))./(2*h);
-        squared_error_noise(n-1) = (y_prime_noise(n-1) - y_prime_true_sampled(n-1)).^2;
+        squared_error_noise(n-1) = (y_prime_noise(n-1) - y_prime_true_sampled(n)).^2;
     end
     
     % Compute L2/RMS error
     sum_of_squares = sum(squared_error);
     mean_squared = sum_of_squares/length(t_sampled_for_deriv);
-    cen_rms = sqrt(mean_squared);
+    central_diff(i) = sqrt(mean_squared);
     sum_of_squares_noise = sum(squared_error_noise);
     mean_squared_noise = sum_of_squares_noise/length(t_sampled_for_deriv);
-    cen_rms_noise = sqrt(mean_squared_noise);
+    central_diff_noise(i) = sqrt(mean_squared_noise);
 
     i = i + 1;
 end
@@ -132,12 +132,12 @@ end
 figure
 tiledlayout(2, 1)
 nexttile
-loglog(K*dt, fwd_rms, '-o', K*dt, bwd_rms, '-x', K*dt, cen_rms, '-o')
+loglog(K*dt, forward_diff, '-o', K*dt, backward_diff, '-x', K*dt, central_diff, '-o')
 legend('forward', 'backward', 'central')
 xlabel('h')
-ylabel('difference')
+ylabel('difference without noise')
 nexttile
-loglog(K*dt, fwd_rms_noise, '-o', K*dt, bwd_rms_noise, '-x', K*dt, cen_rms_noise, '-o')
+loglog(K*dt, forward_diff_noise, '-o', K*dt, backward_diff_noise, '-x', K*dt, central_diff_noise, '-o')
 legend('forward', 'backward', 'central')
 xlabel('h')
 ylabel('difference noise')
