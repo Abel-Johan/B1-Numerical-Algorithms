@@ -16,7 +16,7 @@ noise = normrnd(0, sigma, [1, length(t)]);
 y_noise = y + noise;
 % QN 1
 
-% QN 2
+% QN 2 and 3
 K = 2.^(0:7);
 forward_diff = zeros(1, 8);
 forward_diff_noise = zeros(1, 8);
@@ -141,4 +141,4 @@ loglog(K*dt, forward_diff_noise, '-o', K*dt, backward_diff_noise, '-x', K*dt, ce
 legend('forward', 'backward', 'central')
 xlabel('h')
 ylabel('difference noise')
-% QN 2
+% QN 2 and 3
