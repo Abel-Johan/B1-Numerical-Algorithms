@@ -116,12 +116,12 @@ for i = 1:length(K)
 end
 
 figure
-tiledlayout(2, 1)
-nexttile
-loglog(K*dt, forward_diff, '-o', K*dt, backward_diff, '-x', K*dt, central_diff, '-o')
-legend('forward', 'backward', 'central')
-xlabel('h')
-ylabel('difference without noise')
+% tiledlayout(2, 1)
+% nexttile
+% loglog(K*dt, forward_diff, '-o', K*dt, backward_diff, '-x', K*dt, central_diff, '-o')
+% legend('forward', 'backward', 'central')
+% xlabel('h')
+% ylabel('difference without noise')
 nexttile
 loglog(K*dt, forward_diff_noise, '-o', K*dt, backward_diff_noise, '-x', K*dt, central_diff_noise, '-o')
 legend('forward', 'backward', 'central')
