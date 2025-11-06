@@ -69,13 +69,16 @@ for h = H
     U(:, 1) = [ic_y ic_yd]';
     % Necessary for RK4
 
+    % Find the Euler and RK4 approximated curves
     euler_result = euler(h, omega, t, ic_y, ic_yd);
     U = rk4(F, t, U, h);
     rk4_result = U(1, :);
 
+    % Find the global error of each scheme
     euler_error_percentage(i) = abs(euler_result(end) - exact_soln(end))/exact_soln(end)*100;
     rk4_error_percentage(i) = abs(rk4_result(end) - exact_soln(end))/exact_soln(end)*100;
 
+    % Plot and compare exact solution with Euler and RK4 results
     nexttile  
     plot(t, exact_soln, '-rx', t, euler_result, '-go', t, rk4_result, '-bo')
     xlabel('time')
@@ -85,6 +88,8 @@ for h = H
     i = i + 1;
 end
 
+% Plot on a log-log axes the global error of Euler and RK4 against step
+% size
 figure
 loglog(H, euler_error_percentage, '-rx', H, rk4_error_percentage, '-bx')
 xlabel('step size h')
